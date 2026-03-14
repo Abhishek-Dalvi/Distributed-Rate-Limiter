@@ -60,5 +60,10 @@ Redis (Shared state)
 
 
 
-Future Enhancements
-Additional of Api-Gateway
+# Future Enhancements
+Planned enhancements for the system include:
+- Integration with Api-Gateway to enforce rate limits at the edge.
+- Kubernetes deployment for horizontal scaling experiments
+- Redis Lua scripts for *atomic rate* limit operations
+- Load testing to validate system behavior under high request volumes 
+- Monitoring and metrics using Prometheus and Grafana
