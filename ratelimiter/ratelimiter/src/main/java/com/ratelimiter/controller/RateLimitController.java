@@ -1,0 +1,32 @@
+package com.ratelimiter.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ratelimiter.model.RateLimiterRequest;
+import com.ratelimiter.model.RateLimiterResponse;
+import com.ratelimiter.service.RateLimiterService;
+
+@RestController
+@RequestMapping("/api")
+public class RateLimitController {
+	@Autowired
+	private final RateLimiterService rateLimiterService;
+
+	/**
+	 * @param rateLimiterService
+	 */
+	public RateLimitController(RateLimiterService rateLimiterService) {
+		super();
+		this.rateLimiterService = rateLimiterService;
+	}
+	
+	@PostMapping("/request")
+	public RateLimiterResponse rateLimiterResponse(@RequestBody RateLimiterRequest request) {
+		return rateLimiterService.checkLimit(request.getUserId());
+		
+	}
+}
