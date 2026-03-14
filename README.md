@@ -12,9 +12,7 @@
     - horizontal scalability
     - cloud-native deployment readiness
 
-5. The system is design to evolve toward *Kubernetes* deployment and production-grade observability 
-
-The non functional requirements include robustness, scalability etc
+5. The system is design to evolve toward *Kubernetes* deployment and production-grade observability.
 
 # Architecture
 Client
@@ -43,15 +41,23 @@ Redis (Shared state)
 3. Client
     -  Represent any external system making API calls that need rate limiting protection.
 
+# Token Algorithm Explanation
+1. Each user is associated with a token bucket.
+2. The bucket contains a fixed number of tokens representing the number of allowed requests.
+3. Each incoming request consumes one token from the bucket. 
+4. Tokens are refilled at a *fixed rate* over a time.
+5. If the bucket contains no tokens when a request arrives, the request is rejected.
 
+# Why Token Bucket?
+- Token bucket allows short burts of traffic while maintaining a defined long-term request rate
+- This behaviour is commonly used in production systems such as API gateways and traffic management layes.
 
+# Tech Stack
+1. Java + Springboot- Used to implement the rate limiter service with a REST API interface.
+2. Redis- Used as a distributed data store for maintaining token bucket state.
+3. Docker (future phase)- Used to containerize the service for consistent runtime environments. 
+4. Kubernetes (future phase)-  Used to deploy multiple service instances and test distributed rate limiting behavior. 
 
-Rate Limiting Algorithm
-Tech Stack
-Java + Springboot
-Redis
-Docker
-Kubernetes (later)
 
 
 Future Enhancements
