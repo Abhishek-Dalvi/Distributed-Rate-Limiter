@@ -74,6 +74,8 @@ POST /request
     "userId": "123"
 }
 
+Response:
+
 {
     "allowed": true
 }
