@@ -67,3 +67,13 @@ Planned enhancements for the system include:
 - Redis Lua scripts for *atomic rate* limit operations
 - Load testing to validate system behavior under high request volumes 
 - Monitoring and metrics using Prometheus and Grafana
+
+# Example Request
+POST /request
+{
+    "userId": "123"
+}
+
+{
+    "allowed": true
+}
