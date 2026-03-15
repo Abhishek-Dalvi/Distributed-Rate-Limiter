@@ -1,6 +1,5 @@
 package com.ratelimiter.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +12,7 @@ import com.ratelimiter.service.RateLimiterService;
 @RestController
 @RequestMapping("/api")
 public class RateLimitController {
-	@Autowired
+//	@Autowired
 	private final RateLimiterService rateLimiterService;
 
 	/**
@@ -28,5 +27,10 @@ public class RateLimitController {
 	public RateLimiterResponse rateLimiterResponse(@RequestBody RateLimiterRequest request) {
 		return rateLimiterService.checkLimit(request.getUserId());
 		
+	}
+	
+	@PostMapping("/createUser")
+	public RateLimiterResponse createUser(@RequestBody RateLimiterRequest request) {
+		return rateLimiterService.creatingBucketForNewUserId(request.getUserId());
 	}
 }

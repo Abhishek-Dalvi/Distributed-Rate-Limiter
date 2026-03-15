@@ -1,8 +1,8 @@
 package com.ratelimiter.service;
 
 class TokenBucket {
-	private final int capacity = 10;
-	private final int refillRate = 5;
+//	private final int capacity = 10;
+//	private final int refillRate = 5;
 	private long lastRefillTimestampDate;
 	private int tokens;
 	/**
@@ -13,6 +13,17 @@ class TokenBucket {
 		this.lastRefillTimestampDate = lastRefillTimestampDate;
 		this.tokens = tokens;
 	}
-	
+	long getLastRefillTimestampDate() {
+		return lastRefillTimestampDate;
+	}
+	void setLastRefillTimestampDate(long lastRefillTimestampDate) {
+		this.lastRefillTimestampDate = lastRefillTimestampDate;
+	}
+	int getTokens() {
+		return tokens;
+	}
+	void setTokens(int tokens) {
+		this.tokens = tokens;
+	}
 
 }
