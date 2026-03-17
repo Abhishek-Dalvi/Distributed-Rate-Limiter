@@ -15,12 +15,10 @@ public class RateLimiterService {
 	
 	// Capacity and Refill rate for user
 	private final int capacity = 10;
-	private final int refillRate = 5;
 	private final String SUCCESS_MESSAGE = "Your request is successfull!";
-	private final String REFILL_MESSAGE = "Token count is zero! \n initializing Token Refill!";
 	private final String USER_NOT_FOUND = "User Not found for userId: ";
 	private final String NEW_USER_CREATED = "New user created with userId: ";
-	private final String TOKEN_FREEZE = "Token count exhaust, Wait for 5 second for next request for userId: ";
+	private final String TOKEN_FREEZE = "Token count exhaust, Wait for 1 second for next request for userId: ";
 	
 	
 	public RateLimiterResponse checkLimit(String userId) {
@@ -31,17 +29,15 @@ public class RateLimiterService {
 		if (map.get(userId) != null) {
 			TokenBucket bucket = map.get(userId);
 			int currentTokenNumber = bucket.getTokens();
-			if (currentTokenNumber>1) {
+			if (currentTokenNumber>=1) {
 				bucket.setTokens(currentTokenNumber-1);
 				map.put(userId, bucket);
 				rateLimiterResponse = new RateLimiterResponse(true, currentTokenNumber-1, SUCCESS_MESSAGE);
-			} else if (currentTokenNumber == 1) {
-				bucket.setTokens(0);
-				map.put(userId, bucket);
-				// Note if allowed request is true and token remain is zero then it was last request
-				rateLimiterResponse = new RateLimiterResponse(true, currentTokenNumber-1, REFILL_MESSAGE);
-				
-				// In future we can implement refill mechanism
+				long currentMillis = System.currentTimeMillis();
+				long elapseTime = currentMillis - bucket.getLastRefillTimestamp();
+				if (elapseTime >1000) {
+					bucket.refillBucket(elapseTime);
+				}
 			} else {
 				
 				rateLimiterResponse = new RateLimiterResponse(false, 0, TOKEN_FREEZE + userId);
