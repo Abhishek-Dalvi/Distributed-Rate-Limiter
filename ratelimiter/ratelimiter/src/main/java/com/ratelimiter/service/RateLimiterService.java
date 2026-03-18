@@ -14,7 +14,7 @@ public class RateLimiterService {
 	private ConcurrentHashMap<String, TokenBucket> map = new ConcurrentHashMap<>();
 	
 	// Capacity and Refill rate for user
-	private final int capacity = 10;
+	private final int capacity = 5;
 	private final String SUCCESS_MESSAGE = "Your request is successfull!";
 	private final String USER_NOT_FOUND = "User Not found for userId: ";
 	private final String NEW_USER_CREATED = "New user created with userId: ";
@@ -27,24 +27,31 @@ public class RateLimiterService {
 		
 		// If user exist then checking available tokens
 		if (map.get(userId) != null) {
+			
+			//This gave referrence to bucket object call by address or memory
 			TokenBucket bucket = map.get(userId);
-			int currentTokenNumber = bucket.getTokens();
-			if (currentTokenNumber>=1) {
-				bucket.setTokens(currentTokenNumber-1);
-				map.put(userId, bucket);
-				rateLimiterResponse = new RateLimiterResponse(true, currentTokenNumber-1, SUCCESS_MESSAGE);
+			
+			synchronized (bucket) {
+				// Refill logic comes first.
 				long currentMillis = System.currentTimeMillis();
 				long elapseTime = currentMillis - bucket.getLastRefillTimestamp();
-				if (elapseTime >1000) {
+				// Minimum time required to refill atleast one token is 1000 milliseconds
+				if (elapseTime >10000) {
 					bucket.refillBucket(elapseTime);
 				}
-			} else {
-				
-				rateLimiterResponse = new RateLimiterResponse(false, 0, TOKEN_FREEZE + userId);
+				int currentTokenNumber = bucket.getTokens();
+				if (currentTokenNumber>0) {
+					rateLimiterResponse = new RateLimiterResponse(true, currentTokenNumber-1, SUCCESS_MESSAGE);
+					// Updating bucket after setting a response 
+					bucket.setTokens(currentTokenNumber-1);
+				} else {
+					
+					rateLimiterResponse = new RateLimiterResponse(false, 0, TOKEN_FREEZE + userId);
+				}
 			}
+			
 		} else {
-			// This condition for user not found and condition where request is freeze because token exhaust and timeout both give same response
-			// We need to fix to make it differentiate, probably proper message field
+			// This condition for user not found.
 			rateLimiterResponse = new RateLimiterResponse(false, 0, USER_NOT_FOUND + userId);
 		}
 		
