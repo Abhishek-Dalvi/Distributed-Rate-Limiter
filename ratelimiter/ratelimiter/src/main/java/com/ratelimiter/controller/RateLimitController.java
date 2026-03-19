@@ -28,9 +28,4 @@ public class RateLimitController {
 		return rateLimiterService.checkLimit(request.getUserId());
 		
 	}
-	
-	@PostMapping("/createUser")
-	public RateLimiterResponse createUser(@RequestBody RateLimiterRequest request) {
-		return rateLimiterService.creatingBucketForNewUserId(request.getUserId());
-	}
 }
