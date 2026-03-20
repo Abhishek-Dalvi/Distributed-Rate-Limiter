@@ -4,6 +4,11 @@ class TokenBucket {
 	private final int capacity = 5;
 	private long lastRefillTimestamp;
 	private int tokens;
+	
+	public TokenBucket() {
+		this.lastRefillTimestamp = System.currentTimeMillis();
+		this.tokens = capacity;
+	}
 	/**
 	 * @param lastRefillTimestampDate
 	 * @param tokens

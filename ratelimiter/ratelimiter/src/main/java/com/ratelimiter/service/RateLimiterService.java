@@ -14,23 +14,22 @@ public class RateLimiterService {
 	private ConcurrentHashMap<String, TokenBucket> map = new ConcurrentHashMap<>();
 	
 	// Capacity and Refill rate for user
-	private final int capacity = 5;
 	private final String SUCCESS_MESSAGE = "Your request is successfull!";
 	private final String TOKEN_FREEZE = "Token count exhaust, Wait for 1 second for next request for userId: ";
 	
 	public RateLimiterResponse checkLimit(String userId) {
 		
 		RateLimiterResponse rateLimiterResponse;
-		
 		// Creating bucket for user if doesn't exist.
-		long currentMillis = System.currentTimeMillis();
-		map.computeIfAbsent(userId, k -> new TokenBucket(currentMillis, capacity));
+		
+		map.computeIfAbsent(userId, k -> new TokenBucket());
 		
 		//This gave reference to bucket object call by address or memory
 		TokenBucket bucket = map.get(userId);
 		
 		synchronized (bucket) {
 			// Refill logic comes first.
+			long currentMillis = System.currentTimeMillis();
 			long elapseTime = currentMillis - bucket.getLastRefillTimestamp();
 			// Minimum time required to refill atleast one token is 1000 milliseconds
 			if (elapseTime >10000) {
