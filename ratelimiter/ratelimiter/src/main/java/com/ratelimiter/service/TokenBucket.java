@@ -35,11 +35,9 @@ class TokenBucket {
 		// We are updating only if there is token update happens. 
 		if(finalTokenToAdd>0) {
 			// Considering last refill timestamp as least of token to add basis
-
 			// We need to be consistent by adding exact refill timestamp. 
 			setLastRefillTimestamp(System.currentTimeMillis());
 		}
-		
 		
 		setTokens(finalTokenToAdd + previousTokenCounts);
 	}

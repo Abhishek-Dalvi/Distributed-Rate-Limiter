@@ -12,7 +12,6 @@ import com.ratelimiter.service.RateLimiterService;
 @RestController
 @RequestMapping("/api")
 public class RateLimitController {
-//	@Autowired
 	private final RateLimiterService rateLimiterService;
 
 	/**
