@@ -1,22 +1,18 @@
 package com.ratelimiter.service;
 
 class TokenBucket {
-	private final int capacity = 5;
+	private int capacity;
 	private long lastRefillTimestamp;
 	private int tokens;
+	private int refillRate;
 	
-	public TokenBucket() {
+	public TokenBucket(int capacity, int refillRate) {
 		this.lastRefillTimestamp = System.currentTimeMillis();
 		this.tokens = capacity;
+		this.capacity = capacity;
+		this.refillRate = refillRate;
 	}
-	/**
-	 * @param lastRefillTimestampDate
-	 * @param tokens
-	 */
-	TokenBucket(long lastRefillTimestampDate, int tokens) {
-		this.lastRefillTimestamp= lastRefillTimestampDate;
-		this.tokens = tokens;
-	}
+	
 	long getLastRefillTimestamp() {
 		return lastRefillTimestamp;
 	}
@@ -32,7 +28,7 @@ class TokenBucket {
 	
 	public void refillBucket(long elapsedTime) {
 		// This gives token to add based on rate and can exceeds capacity
-		int tokenToAddAsPerRate = (int) (elapsedTime/10000);
+		int tokenToAddAsPerRate = (int) (elapsedTime/refillRate);
 		int previousTokenCounts = getTokens();
 		int remainingToken = capacity - previousTokenCounts;
 		int finalTokenToAdd = Math.min(tokenToAddAsPerRate, remainingToken);

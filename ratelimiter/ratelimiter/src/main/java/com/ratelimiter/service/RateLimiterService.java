@@ -1,9 +1,11 @@
 package com.ratelimiter.service;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.ratelimiter.model.RateLimiterResponse;
 
 
@@ -11,7 +13,7 @@ import com.ratelimiter.model.RateLimiterResponse;
 public class RateLimiterService {
 	
 	// For storing Bucket information corresponding to userId.
-	private ConcurrentHashMap<String, TokenBucket> map = new ConcurrentHashMap<>();
+	private Cache<String, TokenBucket> bucketcache = Caffeine.newBuilder().expireAfterAccess(60, TimeUnit.SECONDS).build();
 	
 	// Capacity and Refill rate for user
 	private final String SUCCESS_MESSAGE = "Your request is successfull!";
@@ -21,17 +23,16 @@ public class RateLimiterService {
 		
 		RateLimiterResponse rateLimiterResponse;
 		// Creating bucket for user if doesn't exist.
-		
-		map.computeIfAbsent(userId, k -> new TokenBucket());
+		bucketcache.asMap().computeIfAbsent(userId, k -> new TokenBucket(5, 10000));
 		
 		//This gave reference to bucket object call by address or memory
-		TokenBucket bucket = map.get(userId);
+		TokenBucket bucket = bucketcache.asMap().get(userId);
 		
 		synchronized (bucket) {
 			// Refill logic comes first.
 			long currentMillis = System.currentTimeMillis();
 			long elapseTime = currentMillis - bucket.getLastRefillTimestamp();
-			// Minimum time required to refill atleast one token is 1000 milliseconds
+			// Minimum time required to refill atleast one token is 10000 milliseconds
 			if (elapseTime >10000) {
 				bucket.refillBucket(elapseTime);
 			}
