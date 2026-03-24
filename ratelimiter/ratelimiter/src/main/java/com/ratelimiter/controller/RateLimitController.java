@@ -1,5 +1,6 @@
 package com.ratelimiter.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +27,10 @@ public class RateLimitController {
 	public RateLimiterResponse rateLimiterResponse(@RequestBody RateLimiterRequest request) {
 		return rateLimiterService.checkLimit(request.getUserId());
 		
+	}
+	
+	@GetMapping("/hello")
+	public String helloReturn() {
+		return "Hello";
 	}
 }
