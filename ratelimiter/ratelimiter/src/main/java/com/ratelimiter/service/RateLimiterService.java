@@ -17,7 +17,7 @@ public class RateLimiterService {
 	
 	// Capacity and Refill rate for user
 	private final String SUCCESS_MESSAGE = "Your request is successfull!";
-	private final String TOKEN_FREEZE = "Token count exhaust, Wait for 1 second for next request for userId: ";
+	private final String TOKEN_FREEZE = "Token count exhaust, Wait for 10 second for next request for userId: ";
 	
 	public RateLimiterResponse checkLimit(String userId) {
 		

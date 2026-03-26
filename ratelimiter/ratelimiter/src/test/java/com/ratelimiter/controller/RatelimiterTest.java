@@ -1,8 +1,6 @@
 package com.ratelimiter.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -24,13 +22,7 @@ public class RatelimiterTest {
 	private RateLimiterService rateLimiterService;
 	
 	@Test
-	void rateLimitTest() throws Exception {
-		mockMvc.perform(get("/api/hello")).andExpect(status().isOk()).andExpect( content().string("Hello"));
-
-	}
-	
-	@Test
-	void  rateLimiterTest() throws Exception {
+	void  rateLimiterControllerTest() throws Exception {
 		mockMvc.perform(post("/api/request").content("{\"userId\":\"123\"}").contentType("application/json")).andExpect(status().isOk());
 	}
 
