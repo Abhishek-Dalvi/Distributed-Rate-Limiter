@@ -30,7 +30,7 @@ public class RateLimiterService {
 		
 		synchronized (bucket) {
 			// Refill logic comes first.
-			long currentMillis = System.currentTimeMillis();
+			long currentMillis = TimeProvider.currentTimeMillis();
 			long elapseTime = currentMillis - bucket.getLastRefillTimestamp();
 			// Minimum time required to refill atleast one token is 10000 milliseconds
 			if (elapseTime >10000) {

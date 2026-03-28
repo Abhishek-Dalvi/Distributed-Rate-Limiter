@@ -1,10 +1,12 @@
 package com.ratelimiter.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mockStatic;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 import com.ratelimiter.model.RateLimiterResponse;
 
@@ -14,6 +16,11 @@ public class RatelimiterServiceTest {
 	void ratelimiterServiceTest() throws InterruptedException {
 		RateLimiterService rateLimiterService = new RateLimiterService();
 		RateLimiterResponse rateLimiterResponse;
+		
+		// Step 1: Freeze time at 2026-03-28T10:00:00Z
+        Clock timeClock = Clock.fixed(Instant.parse("2026-03-28T10:00:00Z"), ZoneOffset.UTC);
+        
+        TimeProvider.setClockForTesting(timeClock);
 		
 		// Checking for new user till bucket limit exhaust
 		for(int i=4; i>-1; i--) {
@@ -25,8 +32,10 @@ public class RatelimiterServiceTest {
 		// Checking for request after bucket limit exhaust
 		assertEquals("Token count exhaust, Wait for 10 second for next request for userId: user_abc", rateLimiterService.checkLimit("user_abc").getMessageString());
 		
-		// Sleeping time for 10 seconds for refill
-		Thread.sleep(10001L);
+		// Step 2: Advance by 11 seconds
+		Clock timeClockAfter = Clock.fixed(Instant.parse("2026-03-28T10:00:11Z"), ZoneOffset.UTC);
+		
+		TimeProvider.setClockForTesting(timeClockAfter);
 		rateLimiterResponse = rateLimiterService.checkLimit("user_abc");
 		
 		assertEquals("Your request is successfull!", rateLimiterResponse.getMessageString());

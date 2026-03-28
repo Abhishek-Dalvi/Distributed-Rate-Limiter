@@ -7,7 +7,7 @@ class TokenBucket {
 	private int refillRate;
 	
 	public TokenBucket(int capacity, int refillRate) {
-		this.lastRefillTimestamp = System.currentTimeMillis();
+		this.lastRefillTimestamp = TimeProvider.currentTimeMillis();
 		this.tokens = capacity;
 		this.capacity = capacity;
 		this.refillRate = refillRate;
@@ -37,7 +37,7 @@ class TokenBucket {
 		if(finalTokenToAdd>0) {
 			// Considering last refill timestamp as least of token to add basis
 			// We need to be consistent by adding exact refill timestamp. 
-			setLastRefillTimestamp(System.currentTimeMillis());
+			setLastRefillTimestamp(TimeProvider.currentTimeMillis());
 		}
 		
 		setTokens(finalTokenToAdd + previousTokenCounts);
