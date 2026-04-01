@@ -13,7 +13,7 @@ import com.ratelimiter.model.RateLimiterResponse;
 public class RatelimiterServiceTest {
 	
 	@Test
-	void ratelimiterServiceTest() throws InterruptedException {
+	void ratelimiterServiceTest() throws Exception {
 		RateLimiterService rateLimiterService = new RateLimiterService();
 		RateLimiterResponse rateLimiterResponse;
 		
@@ -42,5 +42,5 @@ public class RatelimiterServiceTest {
 		assertEquals(0, rateLimiterResponse.getRemainingToken());
 		
 	}
-
+	
 }
