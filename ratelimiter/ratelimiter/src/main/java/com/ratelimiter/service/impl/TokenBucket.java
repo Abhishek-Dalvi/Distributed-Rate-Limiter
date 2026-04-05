@@ -1,4 +1,6 @@
-package com.ratelimiter.service;
+package com.ratelimiter.service.impl;
+
+import com.ratelimiter.service.TimeProvider;
 
 class TokenBucket {
 	private int capacity;

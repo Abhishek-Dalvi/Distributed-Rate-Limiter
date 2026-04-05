@@ -13,13 +13,14 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import com.ratelimiter.model.RateLimiterResponse;
+import com.ratelimiter.service.impl.InMemoryRateLimiterService;
 
 public class ConcurrencyTest {
 	
 	@RepeatedTest(500)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceConditionTest() throws Exception {
-		RateLimiterService rateLimiterService = new RateLimiterService();
+		InMemoryRateLimiterService rateLimiterService = new InMemoryRateLimiterService();
 		int threadCount = 200;
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 		

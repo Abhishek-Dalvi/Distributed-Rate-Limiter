@@ -9,12 +9,13 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
 import com.ratelimiter.model.RateLimiterResponse;
+import com.ratelimiter.service.impl.InMemoryRateLimiterService;
 
 public class RatelimiterServiceTest {
 	
 	@Test
 	void ratelimiterServiceTest() throws Exception {
-		RateLimiterService rateLimiterService = new RateLimiterService();
+		InMemoryRateLimiterService rateLimiterService = new InMemoryRateLimiterService();
 		RateLimiterResponse rateLimiterResponse;
 		
 		// Step 1: Freeze time at 2026-03-28T10:00:00Z

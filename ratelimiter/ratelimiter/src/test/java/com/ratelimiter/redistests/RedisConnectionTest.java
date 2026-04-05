@@ -1,18 +1,15 @@
-package com.ratelimiter;
+package com.ratelimiter.redistests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import redis.clients.jedis.Jedis;
 
-@SpringBootTest
-class RatelimiterApplicationTests {
-
+public class RedisConnectionTest {
 	@Test
-	void contextLoads() {
+	void checkingRedisConnection() {
 		try (Jedis jedis = new Jedis("localhost", 6379)) {
 			// Store a key-value pair
 			jedis.set("myKey", "Hello Redis!");
