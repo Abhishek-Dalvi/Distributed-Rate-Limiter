@@ -10,12 +10,19 @@ import org.junit.jupiter.api.Test;
 
 import com.ratelimiter.model.RateLimiterResponse;
 import com.ratelimiter.service.impl.InMemoryRateLimiterService;
+import com.ratelimiter.service.impl.RedisRateLimiterService;
+
+import redis.clients.jedis.JedisPool;
 
 public class RatelimiterServiceTest {
 	
 	@Test
 	void ratelimiterServiceTest() throws Exception {
-		InMemoryRateLimiterService rateLimiterService = new InMemoryRateLimiterService();
+//		InMemoryRateLimiterService rateLimiterService = new InMemoryRateLimiterService();
+		
+		JedisPool jedisPool = new JedisPool();
+		
+		RedisRateLimiterService rateLimiterService = new RedisRateLimiterService(jedisPool);
 		RateLimiterResponse rateLimiterResponse;
 		
 		// Step 1: Freeze time at 2026-03-28T10:00:00Z
