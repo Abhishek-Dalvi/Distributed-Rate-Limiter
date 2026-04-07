@@ -16,30 +16,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.ratelimiter.model.RateLimiterResponse;
+import com.ratelimiter.service.impl.InMemoryRateLimiterService;
 import com.ratelimiter.service.impl.RedisRateLimiterService;
+
 
 @SpringBootTest
 public class ConcurrencyTest {
 	
-	private final RedisRateLimiterService rateLimiterService;
-	
+	private final RedisRateLimiterService redisRateLimiterService;
+
 	// Constructor injection — Spring will supply the bean
     @Autowired
-    ConcurrencyTest(RedisRateLimiterService rateLimiterService) {
-        this.rateLimiterService = rateLimiterService;
+    ConcurrencyTest(RedisRateLimiterService redisRateLimiterService) {
+        this.redisRateLimiterService = redisRateLimiterService;
     }
-	
-	
-	@RepeatedTest(5)
+    
+    
+    @RepeatedTest(5)
 	@Execution(ExecutionMode.SAME_THREAD)
-	void checkingRaceConditionTest() throws Exception {
-//		InMemoryRateLimiterService rateLimiterService = new InMemoryRateLimiterService();
-		
-//		JedisPool jedisPool = new JedisPool();
-//		
-//		RedisRateLimiterService rateLimiterService = new RedisRateLimiterService(jedisPool);
-		
-		
+	void checkingRaceCondition() throws Exception {
 		
 		int threadCount = 50;
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
@@ -52,14 +47,16 @@ public class ConcurrencyTest {
 		
         // Shared counter (thread-safe)
         AtomicInteger counter = new AtomicInteger(0);
-		
+        
+        String userId = UUID.randomUUID().toString();
+        
 		Runnable task = () -> {
 			
             try {
             	// Waiting to start multiple thread at a same time.
-            	String userId = UUID.randomUUID().toString();
+            	
             	startLatch.await();
-            	RateLimiterResponse rateLimiterResponse = rateLimiterService.checkLimit(userId);
+            	RateLimiterResponse rateLimiterResponse = redisRateLimiterService.checkLimit(userId);
             	if(rateLimiterResponse.isAllowed()) {
             		counter.incrementAndGet();
             	}
@@ -87,6 +84,61 @@ public class ConcurrencyTest {
         
         assertEquals(5, counter.get());
 
+	}
+	
+	@RepeatedTest(5)
+	@Execution(ExecutionMode.SAME_THREAD)
+	void checkingRaceConditionForInMemory() throws Exception {
+		InMemoryRateLimiterService inMemoryRateLimiterService = new InMemoryRateLimiterService();
+		
+		
+		int threadCount = 50;
+		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+		
+		// Latch to wait until all thread start
+		CountDownLatch startLatch = new CountDownLatch(1);
+		
+		// Latch to wait until all threads finish
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+		
+        // Shared counter (thread-safe)
+        AtomicInteger counter = new AtomicInteger(0);
+        String userId = UUID.randomUUID().toString();
+        
+		Runnable task = () -> {
+			
+            try {
+            	// Waiting to start multiple thread at a same time.
+            	
+            	startLatch.await();
+            	RateLimiterResponse rateLimiterResponse = inMemoryRateLimiterService.checkLimit(userId);
+            	if(rateLimiterResponse.isAllowed()) {
+            		counter.incrementAndGet();
+            	}
+            } catch (Exception e) {
+                System.err.println("error is: " + e.getMessage());
+            } finally {
+				doneLatch.countDown();
+			}
+		};
+		
+		for (int i = 0; i < threadCount; i++) {
+			executorService.submit(task);
+		}
+		
+		// Release all threads at once
+        startLatch.countDown();
+        
+        // Wait until all threads finish
+        doneLatch.await();
+		
+		// Shutdown executor (no new tasks accepted, existing tasks finish)
+        executorService.shutdown();
+        
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        
+        assertEquals(5, counter.get());
+		
 	}
 
 }
