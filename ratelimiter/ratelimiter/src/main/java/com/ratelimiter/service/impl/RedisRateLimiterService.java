@@ -31,6 +31,7 @@ public class RedisRateLimiterService implements RateLimiterServiceInterface {
 		
 		try (Jedis jedis = jedisPool.getResource()) {
 			
+			
 			String userBucketString = jedis.get(userId);
 			long currentMillis = TimeProvider.currentTimeMillis();
 			

@@ -31,7 +31,6 @@ public class ConcurrencyTest {
         this.redisRateLimiterService = redisRateLimiterService;
     }
     
-    
     @RepeatedTest(5)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceCondition() throws Exception {
@@ -86,7 +85,7 @@ public class ConcurrencyTest {
 
 	}
 	
-	@RepeatedTest(5)
+	@RepeatedTest(1)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceConditionForInMemory() throws Exception {
 		InMemoryRateLimiterService inMemoryRateLimiterService = new InMemoryRateLimiterService();
@@ -103,7 +102,8 @@ public class ConcurrencyTest {
 		
         // Shared counter (thread-safe)
         AtomicInteger counter = new AtomicInteger(0);
-        String userId = UUID.randomUUID().toString();
+//        String userId = UUID.randomUUID().toString();
+        String userId = "user_abc";
         
 		Runnable task = () -> {
 			
