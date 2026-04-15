@@ -9,12 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.ratelimiter.model.RateLimiterResponse;
 
 @SpringBootTest
-public class RedisLuaExampleTest {
+public class RedisLuaRateLimiterServiceTest {
 	
-	private final RedisLuaExample redisLuaExample;
+	private final RedisLuaRateLimiterService redisLuaExample;
 	
 	@Autowired
-	public RedisLuaExampleTest(RedisLuaExample redisLuaExample) {
+	public RedisLuaRateLimiterServiceTest(RedisLuaRateLimiterService redisLuaExample) {
 		this.redisLuaExample = redisLuaExample;
 	}
 
@@ -23,7 +23,7 @@ public class RedisLuaExampleTest {
 		
 		
 		for(int i=0; i<6; i++) {
-			RateLimiterResponse rateLimiterResponse =  redisLuaExample.redisLuaExecutionReturn("user_abc");
+			RateLimiterResponse rateLimiterResponse =  redisLuaExample.checkLimit("user_abc");
 			System.out.println("is allowed:" + rateLimiterResponse.isAllowed() + " remaining token: " + rateLimiterResponse.getRemainingToken());
 		}
 		

@@ -13,7 +13,7 @@ public class RateLimiterService {
 	private final RateLimiterServiceInterface rateLimiterServiceInterface;
 	
 	@Autowired //Keeping autowired for understanding. for single constructor it's not needed, it implies.
-	public RateLimiterService(@Qualifier("redisRateLimiterService") RateLimiterServiceInterface rateLimiterServiceInterface) {
+	public RateLimiterService(@Qualifier("redisLuaRateLimiterService") RateLimiterServiceInterface rateLimiterServiceInterface) {
 		this.rateLimiterServiceInterface = rateLimiterServiceInterface;
 	}
 	

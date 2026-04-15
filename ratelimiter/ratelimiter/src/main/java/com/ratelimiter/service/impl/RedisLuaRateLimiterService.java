@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.ratelimiter.model.RateLimiterResponse;
 import com.ratelimiter.service.TimeProvider;
@@ -16,18 +16,16 @@ import com.ratelimiter.service.TimeProvider;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-
-@Component
-public class RedisLuaExample {
+@Service("redisLuaRateLimiterService")
+public class RedisLuaRateLimiterService {
 	public final JedisPool jedisPool;
 	
 	@Autowired
-	public RedisLuaExample(JedisPool jedisPool) {
+	public RedisLuaRateLimiterService(JedisPool jedisPool) {
 		this.jedisPool = jedisPool;
 	}
 
-	public RateLimiterResponse redisLuaExecutionReturn(String userId) throws IOException {
-		boolean ans = false;
+	public RateLimiterResponse checkLimit(String userId) throws IOException {
 		RateLimiterResponse rateLimiterResponse;
 		try(Jedis jedis = jedisPool.getResource()){
 			// Loading Lua script

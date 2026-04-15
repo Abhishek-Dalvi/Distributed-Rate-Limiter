@@ -7,7 +7,7 @@ local value = redis.call('GET', key)
 if not value then
     -- concatenate with a comma
     local valueString = "5," .. tostring(timestamp)
-    redis.call('SET', key, valueString)
+    redis.call('SETEX', key, 3600, valueString) -- 1 hour expiration
 end
 
 local value = redis.call('GET', key)
@@ -24,9 +24,11 @@ local currentTime = tonumber(timestamp)
 local currentTokenNumber = tonumber(parts[1])
 local lastTimestamp = tonumber(parts[2])
 local elapsedTime = currentTime - lastTimestamp
+local effectiveTokenAsPerRate = 0
 
 if elapsedTime >= 10000 then
-    local effectiveTokenAsPerRate = currentTokenNumber + (elapsedTime / 10000)
+    effectiveTokenAsPerRate = currentTokenNumber + (elapsedTime / 10000)
+    -- redis.log(redis.LOG_NOTICE, "Debug: effectiveTokenAsPerRate=" .. effectiveTokenAsPerRate)
     currentTokenNumber = math.min(effectiveTokenAsPerRate, 5) -- Assuming the bucket capacity is 5
     lastTimestamp = currentTime
 end
@@ -37,7 +39,7 @@ if currentTokenNumber >= 1 then
     currentTokenNumber = currentTokenNumber - 1
     -- Update the bucket with the new token count and timestamp
     local newValueString = tostring(currentTokenNumber) .. delimiter .. tostring(lastTimestamp)
-    redis.call('SET', key, newValueString)
+    redis.call('SETEX', key, 3600, newValueString) -- 1 hour expiration
     return {true, currentTokenNumber, "Your request is successfull for userId: " .. key}
 else
     return {false, currentTokenNumber, "Token count exhaust, Wait for 10 second for next request for userId: " .. key}

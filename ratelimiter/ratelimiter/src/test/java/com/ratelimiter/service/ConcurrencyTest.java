@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.ratelimiter.model.RateLimiterResponse;
 import com.ratelimiter.service.impl.InMemoryRateLimiterService;
+import com.ratelimiter.service.impl.RedisLuaRateLimiterService;
 import com.ratelimiter.service.impl.RedisRateLimiterService;
 
 
@@ -24,14 +25,17 @@ import com.ratelimiter.service.impl.RedisRateLimiterService;
 public class ConcurrencyTest {
 	
 	private final RedisRateLimiterService redisRateLimiterService;
+	
+	private final RedisLuaRateLimiterService redisLuaRateLimiterService;
 
 	// Constructor injection — Spring will supply the bean
     @Autowired
-    ConcurrencyTest(RedisRateLimiterService redisRateLimiterService) {
+    ConcurrencyTest(RedisRateLimiterService redisRateLimiterService, RedisLuaRateLimiterService redisLuaRateLimiterService) {
         this.redisRateLimiterService = redisRateLimiterService;
+        this.redisLuaRateLimiterService = redisLuaRateLimiterService;
     }
     
-    @RepeatedTest(5)
+    @RepeatedTest(500)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceCondition() throws Exception {
 		
@@ -55,7 +59,8 @@ public class ConcurrencyTest {
             	// Waiting to start multiple thread at a same time.
             	
             	startLatch.await();
-            	RateLimiterResponse rateLimiterResponse = redisRateLimiterService.checkLimit(userId);
+//            	RateLimiterResponse rateLimiterResponse = redisRateLimiterService.checkLimit(userId);
+            	RateLimiterResponse rateLimiterResponse = redisLuaRateLimiterService.checkLimit(userId);
             	if(rateLimiterResponse.isAllowed()) {
             		counter.incrementAndGet();
             	}
@@ -84,8 +89,10 @@ public class ConcurrencyTest {
         assertEquals(5, counter.get());
 
 	}
+    
+    
 	
-	@RepeatedTest(1)
+	@RepeatedTest(5)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceConditionForInMemory() throws Exception {
 		InMemoryRateLimiterService inMemoryRateLimiterService = new InMemoryRateLimiterService();
