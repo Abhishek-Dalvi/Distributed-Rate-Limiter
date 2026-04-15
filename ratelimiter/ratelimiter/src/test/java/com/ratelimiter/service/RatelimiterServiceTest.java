@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
 import com.ratelimiter.model.RateLimiterResponse;
-import com.ratelimiter.service.impl.InMemoryRateLimiterService;
 import com.ratelimiter.service.impl.RedisRateLimiterService;
 
 import redis.clients.jedis.JedisPool;
@@ -29,22 +29,24 @@ public class RatelimiterServiceTest {
         Clock timeClock = Clock.fixed(Instant.parse("2026-03-28T10:00:00Z"), ZoneOffset.UTC);
         
         TimeProvider.setClockForTesting(timeClock);
+        
+        String userId = UUID.randomUUID().toString();
 		
 		// Checking for new user till bucket limit exhaust
 		for(int i=4; i>-1; i--) {
-			rateLimiterResponse = rateLimiterService.checkLimit("user_abc");
+			rateLimiterResponse = rateLimiterService.checkLimit(userId);
 			assertEquals(i, rateLimiterResponse.getRemainingToken());
 			assertEquals("Your request is successfull!", rateLimiterResponse.getMessageString());
 		}
 		
 		// Checking for request after bucket limit exhaust
-		assertEquals("Token count exhaust, Wait for 10 second for next request for userId: user_abc", rateLimiterService.checkLimit("user_abc").getMessageString());
+		assertEquals("Token count exhaust, Wait for 10 second for next request for userId: "+userId, rateLimiterService.checkLimit(userId).getMessageString());
 		
 		// Step 2: Advance by 11 seconds
 		Clock timeClockAfter = Clock.fixed(Instant.parse("2026-03-28T10:00:11Z"), ZoneOffset.UTC);
 		
 		TimeProvider.setClockForTesting(timeClockAfter);
-		rateLimiterResponse = rateLimiterService.checkLimit("user_abc");
+		rateLimiterResponse = rateLimiterService.checkLimit(userId);
 		
 		assertEquals("Your request is successfull!", rateLimiterResponse.getMessageString());
 		assertEquals(0, rateLimiterResponse.getRemainingToken());
