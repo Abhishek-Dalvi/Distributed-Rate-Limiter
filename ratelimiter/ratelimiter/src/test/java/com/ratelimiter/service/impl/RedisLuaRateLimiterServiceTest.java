@@ -11,11 +11,11 @@ import com.ratelimiter.model.RateLimiterResponse;
 @SpringBootTest
 public class RedisLuaRateLimiterServiceTest {
 	
-	private final RedisLuaRateLimiterService redisLuaExample;
+	private final RedisLuaRateLimiterService redisLuaRateLimiterService;
 	
 	@Autowired
-	public RedisLuaRateLimiterServiceTest(RedisLuaRateLimiterService redisLuaExample) {
-		this.redisLuaExample = redisLuaExample;
+	public RedisLuaRateLimiterServiceTest(RedisLuaRateLimiterService redisLuaRateLimiterService) {
+		this.redisLuaRateLimiterService = redisLuaRateLimiterService;
 	}
 
 	@Test
@@ -23,7 +23,7 @@ public class RedisLuaRateLimiterServiceTest {
 		
 		
 		for(int i=0; i<6; i++) {
-			RateLimiterResponse rateLimiterResponse =  redisLuaExample.checkLimit("user_abc");
+			RateLimiterResponse rateLimiterResponse =  redisLuaRateLimiterService.checkLimit("user_abc");
 			System.out.println("is allowed:" + rateLimiterResponse.isAllowed() + " remaining token: " + rateLimiterResponse.getRemainingToken());
 		}
 		

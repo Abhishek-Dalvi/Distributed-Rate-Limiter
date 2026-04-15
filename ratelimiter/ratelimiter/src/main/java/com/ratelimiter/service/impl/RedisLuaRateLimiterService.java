@@ -11,13 +11,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.ratelimiter.model.RateLimiterResponse;
+import com.ratelimiter.service.RateLimiterServiceInterface;
 import com.ratelimiter.service.TimeProvider;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 @Service("redisLuaRateLimiterService")
-public class RedisLuaRateLimiterService {
+public class RedisLuaRateLimiterService implements RateLimiterServiceInterface {
 	public final JedisPool jedisPool;
 	
 	@Autowired
@@ -25,6 +26,7 @@ public class RedisLuaRateLimiterService {
 		this.jedisPool = jedisPool;
 	}
 
+	@Override
 	public RateLimiterResponse checkLimit(String userId) throws IOException {
 		RateLimiterResponse rateLimiterResponse;
 		try(Jedis jedis = jedisPool.getResource()){

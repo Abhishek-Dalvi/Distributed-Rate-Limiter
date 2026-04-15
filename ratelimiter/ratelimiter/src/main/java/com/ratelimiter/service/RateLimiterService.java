@@ -17,7 +17,7 @@ public class RateLimiterService {
 		this.rateLimiterServiceInterface = rateLimiterServiceInterface;
 	}
 	
-	public RateLimiterResponse checkLimit(String userId) {
+	public RateLimiterResponse checkLimit(String userId) throws Exception {
 		
 		return rateLimiterServiceInterface.checkLimit(userId);
 	}

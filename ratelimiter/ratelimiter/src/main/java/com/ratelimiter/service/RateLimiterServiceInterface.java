@@ -4,6 +4,6 @@ import com.ratelimiter.model.RateLimiterResponse;
 
 public interface RateLimiterServiceInterface {
 	
-	RateLimiterResponse checkLimit(String userId);
+	RateLimiterResponse checkLimit(String userId) throws Exception;
 
 }

@@ -26,7 +26,7 @@ public class RedisRateLimiterService implements RateLimiterServiceInterface {
 	private final String TOKEN_FREEZE = "Token count exhaust, Wait for 10 second for next request for userId: ";
 
 	@Override
-	public RateLimiterResponse checkLimit(String userId) {
+	public RateLimiterResponse checkLimit(String userId) throws Exception {
 		RateLimiterResponse rateLimiterResponse;
 		
 		try (Jedis jedis = jedisPool.getResource()) {
