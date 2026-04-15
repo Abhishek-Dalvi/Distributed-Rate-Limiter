@@ -24,7 +24,7 @@ public class RateLimitController {
 	}
 	
 	@PostMapping("/request")
-	public RateLimiterResponse rateLimiterResponse(@RequestBody RateLimiterRequest request) {
+	public RateLimiterResponse rateLimiterResponse(@RequestBody RateLimiterRequest request) throws Exception {
 		return rateLimiterService.checkLimit(request.getUserId());
 		
 	}
