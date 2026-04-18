@@ -1,6 +1,9 @@
 package com.ratelimiter.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.ratelimiter.model.RateLimiterResponse;
@@ -13,6 +16,14 @@ import redis.clients.jedis.JedisPool;
 
 @Service("redisRateLimiterService")
 public class RedisRateLimiterService implements RateLimiterServiceInterface {
+	
+	private static final Logger log = LoggerFactory.getLogger(RedisRateLimiterService.class);
+	
+	@Value("${bucket.capacity:5}")
+	private int bucketCapacity;
+	
+	@Value("${bucket.refillTime:10000}")
+	private int bucketRefillTime;
 	
 	private final JedisPool jedisPool;
 	
@@ -31,13 +42,12 @@ public class RedisRateLimiterService implements RateLimiterServiceInterface {
 		
 		try (Jedis jedis = jedisPool.getResource()) {
 			
-			
 			String userBucketString = jedis.get(userId);
 			long currentMillis = TimeProvider.currentTimeMillis();
 			
 			//Step 1: Bucket creation for new user in Redis
 			if (userBucketString == null) {
-				String newBucketString = "5," + currentMillis;
+				String newBucketString = bucketCapacity + "," + currentMillis;
 				jedis.set(userId, newBucketString);
 				userBucketString = newBucketString;
 			}
@@ -53,9 +63,9 @@ public class RedisRateLimiterService implements RateLimiterServiceInterface {
 			
 			String updatedUserBucketString;
 			// Minimum time required to refill atleast one token is 10000 milliseconds
-			if (elapseTime >=10000) {
+			if (elapseTime >=bucketRefillTime) {
 				// Number of token after lazy update as per refill rate
-				int effectiveTokenAsPerRate = currentTokenNumber + (int) (elapseTime/10000);
+				int effectiveTokenAsPerRate = currentTokenNumber + (int) (elapseTime/bucketRefillTime);
 				
 				// Number of token after considering bucket capacity and consuming 1 token
 				currentTokenNumber = Math.min(5, effectiveTokenAsPerRate);
@@ -78,6 +88,8 @@ public class RedisRateLimiterService implements RateLimiterServiceInterface {
 				rateLimiterResponse = new RateLimiterResponse(false, 0, TOKEN_FREEZE + userId);
 			}
 		}
+		
+		log.info("For user Id: " + userId + " " + rateLimiterResponse);
 		
 		return rateLimiterResponse;
 	}

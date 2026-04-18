@@ -1,13 +1,16 @@
 local key = KEYS[1]
 local timestamp = ARGV[1]
+local bucketCapacity = ARGV[2]
+local bucketRefillTime = ARGV[3]
+local bucketKeyExpirationTime = ARGV[4]
 local value = redis.call('GET', key)
 
 
 -- Creating a new key with value "5,timestamp" if it does not exist (Bucket initialization)
 if not value then
     -- concatenate with a comma
-    local valueString = "5," .. tostring(timestamp)
-    redis.call('SETEX', key, 3600, valueString) -- 1 hour expiration
+    local valueString = bucketCapacity .. "," .. tostring(timestamp)
+    redis.call('SETEX', key, tonumber(bucketKeyExpirationTime), valueString) -- 1 hour expiration
 end
 
 local value = redis.call('GET', key)
@@ -23,13 +26,14 @@ end
 local currentTime = tonumber(timestamp)
 local currentTokenNumber = tonumber(parts[1])
 local lastTimestamp = tonumber(parts[2])
+local bucketRefillTimeNum = tonumber(bucketRefillTime)
 local elapsedTime = currentTime - lastTimestamp
 local effectiveTokenAsPerRate = 0
 
-if elapsedTime >= 10000 then
-    effectiveTokenAsPerRate = currentTokenNumber + (elapsedTime / 10000)
+if elapsedTime >= bucketRefillTimeNum then
+    effectiveTokenAsPerRate = currentTokenNumber + (elapsedTime / bucketRefillTimeNum)
     -- redis.log(redis.LOG_NOTICE, "Debug: effectiveTokenAsPerRate=" .. effectiveTokenAsPerRate)
-    currentTokenNumber = math.min(effectiveTokenAsPerRate, 5) -- Assuming the bucket capacity is 5
+    currentTokenNumber = math.min(effectiveTokenAsPerRate, tonumber(bucketCapacity)) -- Assuming the bucket capacity is 5
     lastTimestamp = currentTime
 end
 
@@ -39,7 +43,7 @@ if currentTokenNumber >= 1 then
     currentTokenNumber = currentTokenNumber - 1
     -- Update the bucket with the new token count and timestamp
     local newValueString = tostring(currentTokenNumber) .. delimiter .. tostring(lastTimestamp)
-    redis.call('SETEX', key, 3600, newValueString) -- 1 hour expiration
+    redis.call('SETEX', key, tonumber(bucketKeyExpirationTime), newValueString) -- 1 hour expiration
     return {true, currentTokenNumber, "Your request is successfull for userId: " .. key}
 else
     return {false, currentTokenNumber, "Token count exhaust, Wait for 10 second for next request for userId: " .. key}

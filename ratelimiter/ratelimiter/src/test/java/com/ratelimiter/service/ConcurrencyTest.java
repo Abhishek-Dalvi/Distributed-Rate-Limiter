@@ -18,21 +18,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.ratelimiter.model.RateLimiterResponse;
 import com.ratelimiter.service.impl.InMemoryRateLimiterService;
 import com.ratelimiter.service.impl.RedisLuaRateLimiterService;
-import com.ratelimiter.service.impl.RedisRateLimiterService;
 
 
 @SpringBootTest
 public class ConcurrencyTest {
 	
-	private final RedisRateLimiterService redisRateLimiterService;
-	
 	private final RedisLuaRateLimiterService redisLuaRateLimiterService;
+	
+	private final InMemoryRateLimiterService inMemoryRateLimiterService;
 
 	// Constructor injection — Spring will supply the bean
     @Autowired
-    ConcurrencyTest(RedisRateLimiterService redisRateLimiterService, RedisLuaRateLimiterService redisLuaRateLimiterService) {
-        this.redisRateLimiterService = redisRateLimiterService;
+    ConcurrencyTest(RedisLuaRateLimiterService redisLuaRateLimiterService, InMemoryRateLimiterService inMemoryRateLimiterService) {
         this.redisLuaRateLimiterService = redisLuaRateLimiterService;
+        this.inMemoryRateLimiterService = inMemoryRateLimiterService;
     }
     
     @RepeatedTest(500)
@@ -59,7 +58,6 @@ public class ConcurrencyTest {
             	// Waiting to start multiple thread at a same time.
             	
             	startLatch.await();
-//            	RateLimiterResponse rateLimiterResponse = redisRateLimiterService.checkLimit(userId);
             	RateLimiterResponse rateLimiterResponse = redisLuaRateLimiterService.checkLimit(userId);
             	if(rateLimiterResponse.isAllowed()) {
             		counter.incrementAndGet();
@@ -95,8 +93,6 @@ public class ConcurrencyTest {
 	@RepeatedTest(5)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceConditionForInMemory() throws Exception {
-		InMemoryRateLimiterService inMemoryRateLimiterService = new InMemoryRateLimiterService();
-		
 		
 		int threadCount = 50;
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
@@ -109,8 +105,7 @@ public class ConcurrencyTest {
 		
         // Shared counter (thread-safe)
         AtomicInteger counter = new AtomicInteger(0);
-//        String userId = UUID.randomUUID().toString();
-        String userId = "user_abc";
+        String userId = UUID.randomUUID().toString();
         
 		Runnable task = () -> {
 			

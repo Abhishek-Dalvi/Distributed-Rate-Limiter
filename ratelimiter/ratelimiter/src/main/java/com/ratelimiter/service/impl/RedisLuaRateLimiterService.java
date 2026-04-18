@@ -6,7 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,19 @@ import redis.clients.jedis.JedisPool;
 
 @Service("redisLuaRateLimiterService")
 public class RedisLuaRateLimiterService implements RateLimiterServiceInterface {
+	
+	private static final Logger log = LoggerFactory.getLogger(RedisLuaRateLimiterService.class);
+	
 	public final JedisPool jedisPool;
+	
+	@Value("${bucket.capacity:5}")
+	private int bucketCapacity;
+	
+	@Value("${bucket.refillTime:10000}")
+	private int bucketRefillTime;
+	
+	@Value("${bucket.keyExpiration:3600}")
+	private int bucketKeyExpiration;
 	
 	@Autowired
 	public RedisLuaRateLimiterService(JedisPool jedisPool) {
@@ -28,6 +43,7 @@ public class RedisLuaRateLimiterService implements RateLimiterServiceInterface {
 
 	@Override
 	public RateLimiterResponse checkLimit(String userId) throws IOException {
+		
 		RateLimiterResponse rateLimiterResponse;
 		try(Jedis jedis = jedisPool.getResource()){
 			// Loading Lua script
@@ -39,7 +55,7 @@ public class RedisLuaRateLimiterService implements RateLimiterServiceInterface {
             
             long currentMillis = TimeProvider.currentTimeMillis();
             
-            Object bucketInfo = jedis.evalsha(sha, 1, userId, String.valueOf(currentMillis));
+            Object bucketInfo = jedis.evalsha(sha, 1, userId, String.valueOf(currentMillis), String.valueOf(bucketCapacity), String.valueOf(bucketRefillTime), String.valueOf(bucketKeyExpiration));
             
             List<Object> responseValues = (List<Object>) bucketInfo;
             
@@ -62,6 +78,8 @@ public class RedisLuaRateLimiterService implements RateLimiterServiceInterface {
             rateLimiterResponse = new RateLimiterResponse(success, tokenNumberInt, message);
             
 		} 
+		
+		log.info("For user Id: " + userId + " " + rateLimiterResponse);
 		
 		return rateLimiterResponse;
 		

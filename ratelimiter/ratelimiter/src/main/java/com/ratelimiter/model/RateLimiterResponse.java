@@ -23,5 +23,12 @@ public class RateLimiterResponse {
 	public String getMessageString() {
 		return messageString;
 	}
+	@Override
+	public String toString() {
+		return "Is request allowed: " + allowed + ", remaining token counts are: " + remainingToken + ", message is: "
+				+ messageString;
+	}
+	
+	
 
 }
