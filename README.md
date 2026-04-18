@@ -21,11 +21,14 @@ Api-Gateway (later)
     |
 Rate-limiter-service
     |
-Redis (Shared state)
+Redis (Shared state, Lua script)
+    |
+Response
 
 1. The system is designed as a stateless backend service responsible for validating whether request should be allow or reject based on rate limits. 
 2. The service store rate limiting state in *Redis* to allow multiple service instance to share the same rate limit counters. 
-3. This enables horizontal scaling of the system without losing correctness of rate limit enforcement. 
+3. This enables horizontal scaling of the system without losing correctness of rate limit enforcement.
+4. Lua ensure atomic execution 
 
 # Each component in detail
 
@@ -58,13 +61,38 @@ Redis (Shared state)
 3. Docker (future phase)- Used to containerize the service for consistent runtime environments. 
 4. Kubernetes (future phase)-  Used to deploy multiple service instances and test distributed rate limiting behavior. 
 
+# Key problems and solutions
+Problem	                    Solution
+Race condition	            Redis Lua script
+Multiple instance issue	    Shared Redis state
+Token refill accuracy	    Timestamp-based refill
+Memory growth	            TTL
 
+
+# What failed
+- In-memory version     -> works only single instance
+- Redis GET/SET         -> Failed due to race condition
+- Race condition        -> Observed allowCount > capacity
+
+# Importance of Lua script
+GET/SET is not atomic
+Multiple clients read same value
+Lua ensures atomic execution inside redis
+
+# Trade-offs
+By using Redis Lua script it have strong consistency (atomicity) but it create dependency on Redis and using Redis Lua it create slightly higher latency compared with just redis call. We basically push atomicity from application towards data server side.
+
+# Key learning
+- Local synchronization doesn't work in distributed system (In Memory, caffeene cache)
+- Atomicity must be enforced at data layer
+- Race conditions are probabilistics
+- Testing concurrency requires controlled thread start (Latch)
+- Redis Lua can act as distributed lock +  executor
 
 # Future Enhancements
 Planned enhancements for the system include:
 - Integration with Api-Gateway to enforce rate limits at the edge.
 - Kubernetes deployment for horizontal scaling experiments
-- Redis Lua scripts for *atomic rate* limit operations
 - Load testing to validate system behavior under high request volumes 
 - Monitoring and metrics using Prometheus and Grafana
 
@@ -77,5 +105,7 @@ POST /request
 Response:
 
 {
-    "allowed": true
+    "allowed": true,
+    "remainingToken": 4,
+    "messageString": "Your request is successfull for userId: 123"
 }

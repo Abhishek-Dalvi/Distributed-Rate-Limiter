@@ -23,6 +23,10 @@ import com.ratelimiter.service.impl.RedisLuaRateLimiterService;
 @SpringBootTest
 public class ConcurrencyTest {
 	
+	/*
+	 * Note RedisRateLimiterService design intentionally to failed concurrency test
+	 */
+	
 	private final RedisLuaRateLimiterService redisLuaRateLimiterService;
 	
 	private final InMemoryRateLimiterService inMemoryRateLimiterService;
@@ -88,8 +92,6 @@ public class ConcurrencyTest {
 
 	}
     
-    
-	
 	@RepeatedTest(5)
 	@Execution(ExecutionMode.SAME_THREAD)
 	void checkingRaceConditionForInMemory() throws Exception {
