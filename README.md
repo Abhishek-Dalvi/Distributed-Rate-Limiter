@@ -109,3 +109,6 @@ Response:
     "remainingToken": 4,
     "messageString": "Your request is successfull for userId: 123"
 }
+
+# Confluence page
+[Rate distributor](https://abhishek1994dalvi-1767337101213.atlassian.net/wiki/spaces/~712020640a955d9e784103ac7ec44b6b6633de/pages/15728641/Distributed+Rate+Limiter+-+Design+and+Learnings+Token+Bucket)
